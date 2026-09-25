@@ -1,3 +1,4 @@
+import { defineAvalElement } from "@pixel-point/aval-element";
 import {
   createAvalAdapterBinding,
   createAvalAdapterConfiguration,
@@ -22,6 +23,9 @@ export function createAval(
   if (typeof readOptions !== "function") {
     throw new TypeError("createAval requires an option getter");
   }
+  // svelte clones hosts from templates, and webkit never upgrades template
+  // nodes created before the first customElements access
+  if (typeof globalThis.customElements !== "undefined") defineAvalElement();
 
   const configuration = createAvalAdapterConfiguration(readOptions());
   const binding = createAvalAdapterBinding(configuration);
