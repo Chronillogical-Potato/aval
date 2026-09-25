@@ -116,17 +116,22 @@ const BROWSER_ENVIRONMENT: AvalAdapterBindingEnvironment = Object.freeze({
   upgrade(node: AvalAdapterBindingNode): AvalAdapterBindingElementPort {
     defineAvalElement();
     const element = node as unknown as AvalAdapterBindingElementPort;
-    if (
-      typeof element.getSnapshot !== "function" ||
-      typeof element.subscribe !== "function"
-    ) {
-      throw new TypeError(
-        "Registered aval-player does not implement the required snapshot API"
-      );
+    if (!hasSnapshotApi(element)) {
+      customElements.upgrade(node as unknown as Node);
+      if (!hasSnapshotApi(element)) {
+        throw new TypeError(
+          "Registered aval-player does not implement the required snapshot API"
+        );
+      }
     }
     return element;
   }
 });
+
+function hasSnapshotApi(element: AvalAdapterBindingElementPort): boolean {
+  return typeof element.getSnapshot === "function" &&
+    typeof element.subscribe === "function";
+}
 
 export class AvalAdapterBindingImplementation implements AvalAdapterBinding {
   public readonly commands: Readonly<AvalAdapterCommands>;
